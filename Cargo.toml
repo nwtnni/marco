@@ -3,6 +3,7 @@ name = "existential"
 version = "0.1.0"
 authors = ["Newton Ni <nwtnni@gmail.com>"]
 edition = "2018"
+repository = "https://github.com/nwtnni/existential"
 
 [dependencies]
 anyhow = "1.0.26"

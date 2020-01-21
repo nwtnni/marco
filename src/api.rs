@@ -1,5 +1,4 @@
 use std::any;
-use std::time;
 
 use anyhow::anyhow;
 use anyhow::Context;
@@ -7,9 +6,9 @@ use serde::Deserialize;
 
 static CLOUDFLARE_API_URL: &str = "https://api.cloudflare.com/client/v4/";
 
-pub struct Client {
+pub struct Client<'c> {
     token: String,
-    inner: reqwest::blocking::Client,
+    inner: &'c reqwest::blocking::Client,
 }
 
 /// Represents the response from `GET /zones`:
@@ -27,13 +26,12 @@ struct Zone {
     name: String,
 }
 
-impl Client {
-    pub fn new(token: String) -> anyhow::Result<Self> {
-        reqwest::blocking::Client::builder()
-            .timeout(time::Duration::from_secs(15))
-            .build()
-            .map_err(anyhow::Error::from)
-            .map(|inner| Client { token, inner })
+impl<'c> Client<'c> {
+    pub fn new(inner: &'c reqwest::blocking::Client, token: String) -> Self {
+        Client {
+            inner,
+            token,
+        }
     }
 
     /// Retrieve the ID of a single zone.
