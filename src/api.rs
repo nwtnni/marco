@@ -73,6 +73,20 @@ pub struct Record<C> {
     proxied: bool,
 }
 
+impl Record<net::IpAddr> {
+    pub fn id(&self) -> &RecordID {
+        &self.id
+    }
+
+    pub fn ip(&self) -> net::IpAddr {
+        self.content
+    }
+
+    pub fn set_ip(&mut self, ip: net::IpAddr) {
+        self.content = ip;
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct RecordID(String);

@@ -35,14 +35,21 @@ fn main() -> anyhow::Result<()> {
 
     let opt = Opt::from_args();
     let client = client()?;
+    let cloudflare = api::Client::new(&client, opt.token);
+
+    let zone_id = cloudflare.get_zone_id(&opt.zone)?;
+    let mut record = cloudflare.get_dns_record(&opt.zone, &zone_id, &opt.record)?;
+
     let ip = ip::get(&client)?;
-    let cf = api::Client::new(&client, opt.token);
 
-    let zone_id = cf.get_zone_id(&opt.zone)?;
-    let mut record = cf.get_dns_record(&opt.zone, &zone_id, &opt.record)?;
+    // No further work to be done
+    if record.ip() == ip {
+        return Ok(());
+    }
 
-    println!("{:?}", record);
-
+    // Otherwise update Cloudflare DNS to match new public IP
+    record.set_ip(ip);
+    cloudflare.put_dns_record(&zone_id, &opt.zone, record.id(), &opt.record, &record)?;
 
     Ok(())
 }
