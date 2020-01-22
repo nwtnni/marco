@@ -49,6 +49,9 @@ impl fmt::Display for ZoneID {
     }
 }
 
+/// Represents the response from `GET zones/:zone_identifier/dns_records`:
+///
+/// https://api.cloudflare.com/#dns-records-for-a-zone-list-dns-records
 #[derive(Debug, Deserialize)]
 struct Records {
     #[serde(flatten)]
@@ -63,6 +66,7 @@ impl From<Records> for anyhow::Result<Vec<Record<String>>> {
     }
 }
 
+/// Represents a single DNS record from `GET zones/:zone_identifier/dns_records`.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Record<C> {
     id: RecordID,
