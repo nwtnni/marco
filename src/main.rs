@@ -7,6 +7,10 @@ mod api;
 mod ip;
 
 /// Utility for basic dynamic DNS.
+///
+/// Retrieves the current public IP address and updates
+/// the corresponding DNS record entry in Cloudflare.
+/// Intended to be scheduled as a recurring job.
 #[derive(Debug, StructOpt)]
 struct Opt {
     /// Cloudflare API token. 

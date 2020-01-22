@@ -1,3 +1,8 @@
+//! Interaction with the Cloudflare API.
+//!
+//! This module implements the necessary GET and PUT
+//! requests to update a DNS record programmatically.
+
 use std::any;
 use std::error;
 use std::fmt;

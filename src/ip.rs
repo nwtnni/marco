@@ -1,3 +1,9 @@
+//! Retrieval of our public IP address.
+//!
+//! For robustness, this module includes backup providers
+//! so that we only fail if all of them fail. All of these
+//! providers return our public IP address in plaintext form.
+
 use std::fmt;
 use std::net;
 use std::error;
