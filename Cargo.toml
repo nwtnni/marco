@@ -1,9 +1,9 @@
 [package]
-name = "existential"
+name = "marco"
 version = "0.1.0"
 authors = ["Newton Ni <nwtnni@gmail.com>"]
 edition = "2018"
-repository = "https://github.com/nwtnni/existential"
+repository = "https://github.com/nwtnni/marco"
 
 [dependencies]
 anyhow = "1.0.26"

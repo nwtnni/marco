@@ -12,7 +12,7 @@ mod ip;
 /// the corresponding DNS record entry in Cloudflare.
 /// Intended to be scheduled as a recurring job.
 #[derive(Debug, StructOpt)]
-#[structopt(name = "existential", about = "Utility for basic dynamic DNS")]
+#[structopt(name = "marco", about = "Utility for basic dynamic DNS")]
 struct Opt {
     /// Cloudflare API token. 
     ///
