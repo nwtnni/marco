@@ -3,7 +3,7 @@ use std::time;
 use anyhow::Context;
 use structopt::StructOpt;
 
-mod api;
+mod cloudflare;
 mod ip;
 
 /// Utility for basic dynamic DNS.
@@ -58,7 +58,7 @@ fn main() -> anyhow::Result<()> {
 
     log!("Initialized HTTP client");
 
-    let cloudflare = api::Client::new(&client, opt.token);
+    let cloudflare = cloudflare::Client::new(&client, opt.token);
 
     let zone_id = cloudflare.get_zone_id(&opt.zone)?;
 
