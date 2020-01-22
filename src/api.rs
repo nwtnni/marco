@@ -40,6 +40,7 @@ struct Zone {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct ZoneID(String);
 
 impl fmt::Display for ZoneID {
@@ -52,27 +53,28 @@ impl fmt::Display for ZoneID {
 struct Records {
     #[serde(flatten)]
     meta: Meta,
-    result: Vec<Record>, 
+    result: Vec<Record<String>>, 
 }
 
-impl From<Records> for anyhow::Result<Vec<Record>> {
-    fn from(records: Records) -> anyhow::Result<Vec<Record>> {
+impl From<Records> for anyhow::Result<Vec<Record<String>>> {
+    fn from(records: Records) -> anyhow::Result<Vec<Record<String>>> {
         anyhow::Result::<()>::from(records.meta)?;
         Ok(records.result)
     }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Record {
+pub struct Record<C> {
     id: RecordID,
     r#type: String,
     name: String,
-    content: net::IpAddr,
+    content: C,
     ttl: serde_json::Value,
     proxied: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct RecordID(String);
 
 impl fmt::Display for RecordID {
@@ -127,7 +129,7 @@ impl<'c> Client<'c> {
         match zones.len() {
         | 0 => Err(anyhow!("No matching zones found")),
         | 1 => Ok(zones.remove(0).id),
-        | n => Err(anyhow!("{} matching zones found, could not select one", n)),
+        | _ => unreachable!(),
         }
     }
 
@@ -136,18 +138,31 @@ impl<'c> Client<'c> {
         zone_name: &str,
         zone_id: &ZoneID,
         record_name: &str,
-    ) -> anyhow::Result<Record> {
+    ) -> anyhow::Result<Record<net::IpAddr>> {
         let mut records = self
             .get::<Records>(&format!("zones/{}/dns_records", zone_id))
             .with_context(|| format!("Could not get DNS record for {} in zone {}", record_name, zone_name))
-            .and_then(anyhow::Result::<Vec<Record>>::from)?;
+            .and_then(anyhow::Result::<Vec<Record<String>>>::from)?;
 
         records.retain(|record| &record.name == record_name);
 
         match records.len() {
         | 0 => Err(anyhow!("No matching DNS records found")),
-        | 1 => Ok(records.remove(0)),
-        | n => Err(anyhow!("{} matching records found, could not select one", n)),
+        | 1 => {
+            let record = records.remove(0);
+            let ip = record.content
+                .parse::<net::IpAddr>()
+                .with_context(|| format!("Could not parse content of DNS record for {}", record_name))?;
+            Ok(Record {
+                id: record.id,
+                r#type: record.r#type,
+                name: record.name,
+                content: ip,
+                ttl: record.ttl,
+                proxied: record.proxied,
+            })
+        }
+        | _ => unreachable!(),
         }
     }
 
@@ -157,7 +172,7 @@ impl<'c> Client<'c> {
         zone_name: &str,
         record_id: &RecordID,
         record_name: &str,
-        record: &Record,
+        record: &Record<net::IpAddr>,
     ) -> anyhow::Result<()> {
         self.put(&format!("zones/{}/dns_records/{}", zone_id, record_id), record)
             .with_context(|| format!("Could not PUT DNS record for {} in zone {}", record_name, zone_name))
