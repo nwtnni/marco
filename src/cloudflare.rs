@@ -202,7 +202,7 @@ impl<'c> Client<'c> {
     }
 
     fn get<T: serde::de::DeserializeOwned>(&self, route: &str) -> anyhow::Result<T> {
-        let url = format!("{}/{}", CLOUDFLARE_API_URL, route);
+        let url = format!("{}{}", CLOUDFLARE_API_URL, route);
         self.inner
             .get(&url)
             .bearer_auth(&self.token)
@@ -213,7 +213,7 @@ impl<'c> Client<'c> {
     }
 
     fn put<T: serde::Serialize>(&self, route: &str, data: &T) -> anyhow::Result<()> {
-        let url = format!("{}/{}", CLOUDFLARE_API_URL, route);
+        let url = format!("{}{}", CLOUDFLARE_API_URL, route);
         self.inner
             .put(&url)
             .bearer_auth(&self.token)
